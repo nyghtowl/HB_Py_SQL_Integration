@@ -3,6 +3,13 @@ import sqlite3
 DB = None
 CONN = None
 
+
+def make_new_student(first_name, last_name, github):
+    query = """INSERT into Students values (?, ?, ?)"""
+    DB.execute(query, (first_name, last_name, github))
+    CONN.commit()
+    print """Successfully added student: %s %s"""%(first_name, last_name)
+
 def get_student_by_github(github):
     query = """SELECT first_name, last_name, github FROM Students WHERE github = ?"""
     DB.execute(query, (github,))
@@ -11,9 +18,17 @@ def get_student_by_github(github):
 Student: %s %s
 Github account: %s"""%(row[0], row[1], row[2])
 
+def list_project(name):
+    query = """SELECT * FROM Projects WHERE title = ?"""
+    DB.execute(query, (name,))
+    row = DB.fetchone()
+    print"""\
+    Project: %s 
+    Max Score: %s """ %(row[0], row[2])
+
 def connect_to_db():
     global DB, CONN
-    CONN = sqlite3.connect("hackbright.db")
+    CONN = sqlite3.connect("my_database.db")
     DB = CONN.cursor()
 
 def main():
@@ -29,8 +44,11 @@ def main():
             get_student_by_github(*args) 
         elif command == "new_student":
             make_new_student(*args)
-
+        elif command == "project_title":
+            list_project(*args)
+        
     CONN.close()
+
 
 if __name__ == "__main__":
     main()
