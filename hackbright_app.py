@@ -10,6 +10,30 @@ def make_new_student(first_name, last_name, github):
     CONN.commit()
     print """Successfully added student: %s %s"""%(first_name, last_name)
 
+def make_new_project(title, description, max_grade):
+    query = """INSERT into Projects VALUES (?, ?, ?) """
+    DB.execute(query, (title, description, max_grade))
+    CONN.commit()
+    print """Successfully added project %s"""%(title)
+
+def give_grade(student_github, project_title, grade):
+    query = """INSERT into Grades values (?, ?, ?)"""
+    DB.execute(query, (student_github, project_title, grade))
+    CONN.commit()
+    print """Successfully added grade: %s""" %(grade)
+
+def student_grade(student_github, project_title):
+    query = """SELECT grade FROM Grades WHERE student_github=? AND project_title=?"""
+    DB.execute(query, (student_github, project_title))
+    row = DB.fetchone()
+    print """Grade: %s"""%(row)
+
+def student_grades(first_name):
+    query = """SELECT first_name, project_title, grade FROM ReportCardView WHERE first_name=?"""
+    DB.execute(query, (first_name))
+    row = DB.fetchone()
+    print """%s has %s for %s"""%(row[0],row[2],row[1])
+
 def get_student_by_github(github):
     query = """SELECT first_name, last_name, github FROM Students WHERE github = ?"""
     DB.execute(query, (github,))
@@ -35,8 +59,8 @@ def main():
     connect_to_db()
     command = None
     while command != "quit":
-        input_string = raw_input("HBA Database> ")
-        tokens = input_string.split()
+        input_string = raw_input("HBA Database > ")
+        tokens = input_string.split(", ")
         command = tokens[0]
         args = tokens[1:]
 
@@ -46,6 +70,14 @@ def main():
             make_new_student(*args)
         elif command == "project_title":
             list_project(*args)
+        elif command == "new_project":
+            make_new_project(*args)
+        elif command == "get_grade":
+            student_grade(*args)
+        elif command == "give_grade":
+            give_grade(*args)
+        elif command == "student_grades":
+            student_grades(*args)
         
     CONN.close()
 
